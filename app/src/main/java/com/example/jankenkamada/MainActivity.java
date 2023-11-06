@@ -10,39 +10,48 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    enum Hand {
+        GU(0),
+        CH(1),
+        PA(2),
+        ;
+
+        private final int id;
+
+        Hand(final int id) {
+            this.id = id;
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CountApp countApp = (CountApp) this.getApplication();
-        int count = countApp.getAddCount();
+        int count = ScoreManager.getNumOfGames();
 
-        TextView textView = findViewById(R.id.battle_shout);
+        TextView battleShout = findViewById(R.id.battle_shout);
         ImageButton img_g = findViewById(R.id.Gu);
         ImageButton img_t = findViewById(R.id.Tyo);
         ImageButton img_p = findViewById(R.id.Pa);
 
-        int gu = 0,tyo = 1,pa = 2;
-
-        if(count > 0){
-            textView.setText("第"+ (count+1) +"戦目：じゃーんけーん......");
+        if (count > 0) {
+            battleShout.setText("第" + (count + 1) + "戦目：じゃーんけーん......");
         }
 
         Intent intent = new Intent(getApplication(), ResultActivity.class);
         img_g.setOnClickListener(v -> {
-            intent.putExtra("hand", gu);
+            intent.putExtra("hand", Hand.GU.id);
             startActivity(intent);
         });
         img_t.setOnClickListener(v -> {
-            intent.putExtra("hand", tyo);
+            intent.putExtra("hand", Hand.CH.id);
             startActivity(intent);
         });
         img_p.setOnClickListener(v -> {
-            intent.putExtra("hand", pa);
+            intent.putExtra("hand", Hand.PA.id);
             startActivity(intent);
         });
-
     }
 }

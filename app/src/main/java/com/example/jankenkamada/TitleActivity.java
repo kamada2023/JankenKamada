@@ -7,30 +7,30 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class TitleActivity extends AppCompatActivity {
-    private CountApp countApp;
     @Override
-    protected void onCreate(Bundle savedInstance){
+    protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         setContentView(R.layout.activity_title);
 
-        countApp = (CountApp)this.getApplication();
+        TextView overAllScore = findViewById(R.id.gameCount);
+        TextView resetResult = findViewById(R.id.reset);
+        TextView nextSean = findViewById(R.id.nextSean);
 
-        TextView textView1 = findViewById(R.id.gameCount);
-        TextView textView2 = findViewById(R.id.reset);
-        TextView textView3 = findViewById(R.id.nextSean);
+        overAllScore.setText(overAllResult());
 
-        String totalResult = getString(R.string.total_result,countApp.getNumOfWins(),
-                countApp.getNumOfLoses(),countApp.getNumOfDraws());
-        textView1.setText(totalResult);
-
-        textView2.setOnClickListener(view -> {
-            countApp.clearSetCount();
-            textView1.setText(totalResult);
+        resetResult.setOnClickListener(view -> {
+            ScoreManager.clearSetCount();
+            overAllScore.setText(overAllResult());
         });
 
-        textView3.setOnClickListener(view -> {
+        nextSean.setOnClickListener(view -> {
             Intent intent = new Intent(getApplication(), SelectActivity.class);
             startActivity(intent);
         });
+    }
+
+    private String overAllResult() {
+        return getString(R.string.total_result, ScoreManager.getNumOfMatchesWon(),
+                ScoreManager.getNumOfMatchesLost(), ScoreManager.getNumOfMatchesDrawn());
     }
 }

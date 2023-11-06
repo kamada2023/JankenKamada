@@ -34,12 +34,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:src="@drawable/title"/>
+            android:src="@drawable/title"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/main"/>
+            android:src="@drawable/main"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:layout_weight="1"
