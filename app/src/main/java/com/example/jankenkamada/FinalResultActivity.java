@@ -11,16 +11,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class FinalResultActivity extends AppCompatActivity {
 
+    int countWin_fin = ScoreManager.getNumOfWins();
+    int countLose_fin = ScoreManager.getNumOfLoses();
+    int countDraw_fin = ScoreManager.getNumOfDraws();
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finalresult);
-
-        CountApp countApp = (CountApp) this.getApplication();
-        int countWin_fin = countApp.getWinCount();
-        int countLose_fin = countApp.getLoseCount();
-        int countDraw_fin = countApp.getDrawCount();
 
         ImageView result = findViewById(R.id.result_draw_final);
         TextView win = findViewById(R.id.fin_countWin);
@@ -28,32 +27,37 @@ public class FinalResultActivity extends AppCompatActivity {
         TextView draw = findViewById(R.id.fin_countDraw);
         Button button = findViewById(R.id.backTitle);
 
-        Intent intent = new Intent(getApplication(),TitleActivity.class);
+        Intent intent = new Intent(getApplication(), TitleActivity.class);
 
-        if (countWin_fin > countLose_fin){
-            result.setImageResource(R.drawable.youwin);
-            countApp.setNumOfWins(1);
-        } else if (countLose_fin > countWin_fin){
-            result.setImageResource(R.drawable.youlose);
-            countApp.setNumOfLoses(1);
-        } else {
-            result.setImageResource(R.drawable.drawgame);
-            countApp.setNumOfDraws(1);
-        }
-        if(countApp.getBattleFormat() == 1){
-            if (countDraw_fin > (countApp.getCount() / 2)){
-                result.setImageResource(R.drawable.drawgame);
-                countApp.setNumOfDraws(1);
-            }
-        }
+        result.setImageResource(resultTitle());
 
-        win.setText("勝った数："+countWin_fin);
-        lose.setText("負けた数："+countLose_fin);
-        draw.setText("引き分け数："+countDraw_fin);
+        win.setText("勝った数：" + countWin_fin);
+        lose.setText("負けた数：" + countLose_fin);
+        draw.setText("引き分け数：" + countDraw_fin);
 
         button.setOnClickListener(view -> {
-            countApp.clearCount();
+            ScoreManager.clearCount();
             startActivity(intent);
         });
+    }
+
+    private int resultTitle() {
+        int HalfDrawCount = ScoreManager.getTotalNumOfGames() / 2;
+
+        if (ScoreManager.getBattleFormat() == 1 && countDraw_fin > HalfDrawCount) {
+            ScoreManager.setNumOfMatchesDrawn();
+            return R.drawable.drawgame;
+        } else {
+            if (countWin_fin > countLose_fin) {
+                ScoreManager.setNumOfMatchesWon();
+                return R.drawable.youwin;
+            } else if (countLose_fin > countWin_fin) {
+                ScoreManager.setNumOfMatchesLost();
+                return R.drawable.youlose;
+            } else {
+                ScoreManager.setNumOfMatchesDrawn();
+                return R.drawable.drawgame;
+            }
+        }
     }
 }

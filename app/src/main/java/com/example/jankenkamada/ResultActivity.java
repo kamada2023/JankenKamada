@@ -1,17 +1,31 @@
 package com.example.jankenkamada;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import java.util.Random;
 
 
 public class ResultActivity extends AppCompatActivity {
 
-    private CountApp countApp;
+    enum Hand {
+        GU(0),
+        CH(1),
+        PA(2),
+        ;
+
+        private final int id;
+
+        Hand(final int id) {
+            this.id = id;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,103 +33,96 @@ public class ResultActivity extends AppCompatActivity {
 
         long seed = System.currentTimeMillis();
         Random rnd = new Random(seed);
-        int r = rnd.nextInt(3);
+        int cpu_hand = rnd.nextInt(3);
 
         Intent intent = getIntent();
-        int id = intent.getIntExtra("hand",0);
+        int user_hand = intent.getIntExtra("hand", 0);
 
         Button button = findViewById(R.id.nextBattle);
         ImageView myImage = findViewById(R.id.result_draw);
 
-        countApp = (CountApp)this.getApplication();
-        countApp.setAddCount(1);
+        ScoreManager.setNumOfGames();
 
-        if (id == r) {
-            if (countApp.getAddCount() <= countApp.getCount()){
-                countApp.setDrawCount(1);
+        if (user_hand == cpu_hand) {
+            if (ScoreManager.getNumOfGames() <= ScoreManager.getTotalNumOfGames()) {
+                ScoreManager.setNumOfDraws();
             }
             myImage.setImageResource(R.drawable.draw);
             TextView textView = findViewById(R.id.result);
-            textView.setText("引き分け");
-        } else if ((id==2 && r==0) || (id+1)==r) {
-            if (countApp.getAddCount() <= countApp.getCount()){
-                countApp.setWinCount(1);
+            textView.setText(R.string.draw);
+        } else if ((user_hand == 2 && cpu_hand == 0) || (user_hand + 1) == cpu_hand) {
+            if (ScoreManager.getNumOfGames() <= ScoreManager.getTotalNumOfGames()) {
+                ScoreManager.setNumOfWins();
             }
             myImage.setImageResource(R.drawable.win);
             TextView textView = findViewById(R.id.result);
-            textView.setText("あんたの勝ち！！");
+            textView.setText(R.string.win);
         } else {
-            if (countApp.getAddCount() <= countApp.getCount()){
-                countApp.setLoseCount(1);
+            if (ScoreManager.getNumOfGames() <= ScoreManager.getTotalNumOfGames()) {
+                ScoreManager.setNumOfLoses();
             }
             myImage.setImageResource(R.drawable.lose);
             TextView textView = findViewById(R.id.result);
-            textView.setText("あなたの負け..");
+            textView.setText(R.string.lose);
         }
 
-        if(r==0){
-            ImageView cpu_hands = findViewById(R.id.cpu_hand);
-            cpu_hands.setImageResource(R.drawable.j_gu02);
-        } else if (r==1) {
-            ImageView cpu_hands = findViewById(R.id.cpu_hand);
-            cpu_hands.setImageResource(R.drawable.j_ch02);
-        }else{
-            ImageView cpu_hands = findViewById(R.id.cpu_hand);
-            cpu_hands.setImageResource(R.drawable.j_pa02);
+        ImageView cpu_hands = findViewById(R.id.cpu_hand);
+        cpu_hands.setImageResource(handDisplay(cpu_hand));
+
+        ImageView user_hands = findViewById(R.id.user_hand);
+        user_hands.setImageResource(handDisplay(user_hand));
+
+        if (ScoreManager.getNumOfGames() == 1) {
+            button.setText(R.string.next_battle);
+        } else {
+            button.setText(R.string.next_sean);
         }
 
-        if(id==0){
-            ImageView cpu_hands = findViewById(R.id.user_hand);
-            cpu_hands.setImageResource(R.drawable.j_gu02);
-        } else if (id==1) {
-            ImageView cpu_hands = findViewById(R.id.user_hand);
-            cpu_hands.setImageResource(R.drawable.j_ch02);
-        }else{
-            ImageView cpu_hands = findViewById(R.id.user_hand);
-            cpu_hands.setImageResource(R.drawable.j_pa02);
-        }
-
-        if(countApp.getAddCount() == 1){
-            button.setText("次の対戦へ");
-        }else {
-            button.setText("次のシーンへ");
-        }
-
-        button.setOnClickListener(v -> {
-            ContinueOrEnd();
-        });
+        button.setOnClickListener(v -> ContinueOrEnd());
     }
-    private void ContinueOrEnd(){
+
+    private int handDisplay(int hand_id) {
+        if (hand_id == Hand.GU.id) {
+            return R.drawable.j_gu02;
+        } else if (hand_id == Hand.CH.id) {
+            return R.drawable.j_ch02;
+        } else {
+            return R.drawable.j_pa02;
+        }
+    }
+
+    private void ContinueOrEnd() {
         Intent ConOrEnd;
-        Intent first = new Intent(getApplication(),MainActivity.class);
-        Intent con = new Intent(getApplication(),HalfwayProgressActivity.class);
-        Intent end = new Intent(getApplication(),FinalResultActivity.class);
+        Intent first = new Intent(getApplication(), MainActivity.class);
+        Intent con = new Intent(getApplication(), HalfwayProgressActivity.class);
+        Intent end = new Intent(getApplication(), FinalResultActivity.class);
 
-        countApp = (CountApp)this.getApplication();
-        int game = countApp.getCount();
-        int rounds = countApp.getAddCount();
-        int win = countApp.getWinCount();
-        int lose = countApp.getLoseCount() ;
+        int game = ScoreManager.getTotalNumOfGames();
+        int rounds = ScoreManager.getNumOfGames();
+        int win = ScoreManager.getNumOfWins();
+        int lose = ScoreManager.getNumOfLoses();
 
-        if(rounds == 1) {ConOrEnd = first;}
-        else {ConOrEnd = con;}
+        if (rounds == 1) {
+            ConOrEnd = first;
+        } else {
+            ConOrEnd = con;
+        }
 
-        if (countApp.getBattleFormat() == 1){
-            if ((win - lose) > (game-rounds)){
+        if (ScoreManager.getBattleFormat() == 1) {
+            if ((win - lose) > (game - rounds)) {
                 ConOrEnd = end;
-            } else if ((lose - win) > (game-rounds)) {
+            } else if ((lose - win) > (game - rounds)) {
                 ConOrEnd = end;
-            } else if (countApp.getDrawCount() > (game/2)) {
+            } else if (ScoreManager.getNumOfDraws() > (game / 2)) {
                 ConOrEnd = end;
             }
         }
 
         if (game == rounds) {
             ConOrEnd = end;
-        } else if (game < rounds){
+        } else if (game < rounds) {
             ConOrEnd = end;
         }
-
 
         startActivity(ConOrEnd);
     }

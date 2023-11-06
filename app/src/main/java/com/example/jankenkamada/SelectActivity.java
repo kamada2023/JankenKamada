@@ -11,46 +11,49 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class SelectActivity extends AppCompatActivity {
 
+    enum battleMode {
+        ROUND_ROBIN_BATTLE(0),
+        STAR_BATTLE(1),
+        ;
+
+        final int mode;
+
+        battleMode(final int mode) {
+            this.mode = mode;
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     @Override
-    protected void onCreate( Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select);
 
-        CountApp countApp = (CountApp) this.getApplication();
-        Intent intent = new Intent(getApplication(),MainActivity.class);
+        Intent intent = new Intent(getApplication(), MainActivity.class);
 
-        TextView textView = findViewById(R.id.gameMode);
-        TextView textView2 = findViewById(R.id.rule);
-        TextView textView3 = findViewById(R.id.round_count);
+        TextView gameMode = findViewById(R.id.gameMode);
+        TextView rule = findViewById(R.id.rule);
+        TextView roundCount = findViewById(R.id.round_count);
         SeekBar modeSeekbar = findViewById(R.id.mode_change);
         SeekBar countSet = findViewById(R.id.gameCount);
-        Button button = findViewById(R.id.game_start);
+        Button gameStart = findViewById(R.id.game_start);
 
-        countApp.setBattleFormat(0);
-        textView.setText("総当たり戦");
-        textView3.setText("回数："+countApp.getCount());
+        ScoreManager.setBattleFormat(0);
+        gameMode.setText(R.string.round_robin_battle);
+        roundCount.setText("回数：" + ScoreManager.getTotalNumOfGames());
 
         modeSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (i == 1){
-                    countApp.setBattleFormat(i);
-                    textView.setText("星取り　戦");
-                    textView2.setText(
-                            "1.対戦形式は任意で1～10まで対戦できます\n" +
-                            "2.設定した回戦数の半分以上を満たした場合終了します\n" +
-                            "3.設定した回数を達した場合終了します\n"+
-                            "4.設定した回数が半分以上があいこだった場合は引き分けとします");
+                if (i == battleMode.STAR_BATTLE.mode) {
+                    ScoreManager.setBattleFormat(battleMode.STAR_BATTLE.mode);
+                    gameMode.setText(R.string.star_battle);
+                    rule.setText(R.string.rule2);
 
-                }else {
-                    countApp.setBattleFormat(i);
-                    textView.setText("総当たり戦");
-                    textView2.setText(
-                            "1.対戦形式は任意で1～10まで対戦できます\n" +
-                            "2.対戦は勝敗に問わずカウントします\n" +
-                            "3.設定した値まで終了しません\n" +
-                            "4.結果は総合的に判断します");
+                } else {
+                    ScoreManager.setBattleFormat(battleMode.ROUND_ROBIN_BATTLE.mode);
+                    gameMode.setText(R.string.round_robin_battle);
+                    rule.setText(R.string.rule1);
                 }
             }
 
@@ -68,8 +71,8 @@ public class SelectActivity extends AppCompatActivity {
         countSet.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                countApp.setCount(i+1);
-                textView3.setText("回数："+(i+1));
+                ScoreManager.setTotalNumOfGames(i + 1);
+                roundCount.setText("回数：" + (i + 1));
             }
 
             @Override
@@ -83,8 +86,6 @@ public class SelectActivity extends AppCompatActivity {
             }
         });
 
-        button.setOnClickListener(v -> {
-            startActivity(intent);
-        });
+        gameStart.setOnClickListener(v -> startActivity(intent));
     }
 }
